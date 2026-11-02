@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5f8f6b">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="自分メンテ30">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>自分メンテナンス30日</title>
+<style>
+  :root {
+    --bg: #f6f3ec;
+    --card: #ffffff;
+    --ink: #3d3a35;
+    --sub: #8a8478;
+    --line: #e6e0d4;
+    --main: #5f8f6b;
+    --main-soft: #e4efe6;
+    --accent: #d98c5f;
+    --accent-soft: #fbeadf;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  body { padding-bottom: 84px; }
+  header { background: var(--main); color: #fff; padding: 18px 16px 22px; border-radius: 0 0 22px 22px; }
+  header .who { font-size: 14px; opacity: .9; }
+  header .day { font-size: 30px; font-weight: bold; margin-top: 4px; }
+  header .day small { font-size: 15px; font-weight: normal; margin-left: 6px; }
+  .bar { height: 8px; background: rgba(255,255,255,.3); border-radius: 4px; margin-top: 12px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: #fff; border-radius: 4px; }
+  .notice { margin: 14px 16px 0; background: var(--accent-soft); color: #9a5a33; border-radius: 12px; padding: 10px 14px; font-size: 14px; }
+  main { max-width: 520px; margin: 0 auto; }
+  section { display: none; padding: 0 16px; }
+  section.on { display: block; }
+  h2 { font-size: 17px; margin: 22px 0 10px; }
+  .card { background: var(--card); border-radius: 16px; padding: 6px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row label { font-size: 16px; }
+  .row .in { display: flex; align-items: center; gap: 6px; color: var(--sub); }
+  .row .in em { font-style: normal; width: 20px; }
+  .row input { width: 110px; font-size: 20px; text-align: right; padding: 8px 10px; border: 1px solid var(--line);
+    border-radius: 10px; background: #fbfaf7; color: var(--ink); font-family: inherit; }
+  .row input:focus { outline: 2px solid var(--main); border-color: transparent; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .chk { border: 2px solid var(--line); background: var(--card); border-radius: 14px; padding: 14px 8px; font-size: 15px; white-space: nowrap;
+    color: var(--ink); font-family: inherit; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .chk .mark { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line); flex: none;
+    display: grid; place-items: center; font-size: 18px; color: #fff; }
+  .chk.done { border-color: var(--main); background: var(--main-soft); }
+  .chk.done .mark { background: var(--main); border-color: var(--main); }
+  .feel { display: flex; justify-content: space-between; gap: 6px; }
+  .feel button { flex: 1; border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 8px 0;
+    font-size: 24px; cursor: pointer; }
+  .feel button span { display: block; font-size: 11px; color: var(--sub); margin-top: 2px; font-family: inherit; }
+  .feel button.on { border-color: var(--accent); background: var(--accent-soft); }
+  textarea { width: 100%; min-height: 80px; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: 12px; font-family: inherit; color: var(--ink); background: var(--card); }
+  .save { display: block; width: 100%; margin: 22px 0 8px; padding: 16px; font-size: 18px; font-weight: bold; color: #fff;
+    background: var(--main); border: 0; border-radius: 30px; font-family: inherit; cursor: pointer; }
+  .toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); background: var(--ink); color: #fff;
+    padding: 12px 20px; border-radius: 24px; font-size: 15px; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
+  .toast.on { opacity: .92; }
+
+  .table-wrap { overflow-x: auto; background: var(--card); border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; white-space: nowrap; }
+  th, td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line); }
+  th { background: #faf8f3; color: var(--sub); font-weight: normal; position: sticky; top: 0; }
+  td.num { text-align: right; }
+  td.o { color: var(--main); font-weight: bold; font-size: 15px; }
+  tr.today td { background: var(--accent-soft); }
+  tr.fast td:first-child { color: var(--accent); font-weight: bold; }
+  tr.future td { color: #c9c3b6; }
+  .legend { font-size: 12px; color: var(--sub); margin: 8px 2px 0; }
+  .plan { display: flex; gap: 10px; }
+  .plan > div { flex: 1; background: var(--card); border-radius: 14px; padding: 12px; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .plan b { display: block; color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+
+  .photo-btn { margin-top: 8px; width: 100%; padding: 10px 0; border: 2px dashed var(--accent); background: #fff;
+    color: var(--accent); border-radius: 12px; font-size: 14px; font-family: inherit; cursor: pointer; }
+  .photo-done { margin-top: 6px; color: var(--main); font-weight: bold; }
+  .photo-card { margin-top: 14px; background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 14px 16px; }
+  .photo-card b { color: var(--accent); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--card); border-radius: 14px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .stat .k { font-size: 13px; color: var(--sub); }
+  .stat .v { font-size: 22px; font-weight: bold; margin-top: 2px; }
+  .stat .d { font-size: 14px; color: var(--main); font-weight: bold; }
+  .chart { background: var(--card); border-radius: 16px; padding: 12px 8px 6px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  h2 .avg { font-size: 13px; font-weight: normal; color: var(--sub); margin-left: 8px; }
+  .chart svg { width: 100%; height: auto; display: block; }
+
+  nav { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line);
+    display: flex; padding-bottom: env(safe-area-inset-bottom); }
+  nav button { flex: 1; border: 0; background: none; padding: 10px 0 12px; font-size: 12px; color: var(--sub);
+    font-family: inherit; cursor: pointer; }
+  nav button .ic { display: block; font-size: 22px; margin-bottom: 2px; }
+  nav button.on { color: var(--main); font-weight: bold; }
+  .daysel { display: flex; align-items: center; justify-content: space-between; margin-top: 16px;
+    background: var(--card); border-radius: 14px; padding: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .daysel button { width: 44px; height: 40px; border: 0; background: var(--main-soft); color: var(--main); border-radius: 10px;
+    font-size: 20px; cursor: pointer; }
+  .daysel button:disabled { opacity: .3; cursor: default; }
+  .daysel span { font-size: 16px; font-weight: bold; }
+  .save:disabled { opacity: .5; }
+  .empty { color: var(--sub); font-size: 14px; text-align: center; padding: 28px 0; }
+  .cover { position: fixed; inset: 0; background: var(--bg); display: grid; place-items: center; z-index: 10;
+    text-align: center; padding: 24px; font-size: 16px; line-height: 1.8; }
+  .cover.off { display: none; }
+</style>
+</head>
+<body>
+<div class="cover" id="cover">読みこんでいます…</div>
+
+<header>
+  <div class="who" id="who"></div>
+  <div class="day" id="dayTitle"></div>
+  <div class="bar"><i id="bar"></i></div>
+</header>
+
+<main>
+  <div class="notice" id="notice"></div>
+
+  <!-- ① 今日の記録 -->
+  <section id="tab-today" class="on">
+    <div id="photo-today"></div>
+    <div class="daysel">
+      <button id="prevDay" aria-label="前の日">‹</button>
+      <span id="selLabel"></span>
+      <button id="nextDay" aria-label="次の日">›</button>
+    </div>
+    <h2><span class="dl">今日</span>の数字</h2>
+    <div class="card">
+      <div class="row"><label for="f-weight">体重</label><span class="in"><input id="f-weight" inputmode="decimal" placeholder="—"><em>kg</em></span></div>
+      <div class="row"><label for="f-fat">体脂肪率</label><span class="in"><input id="f-fat" inputmode="decimal" placeholder="—"><em>％</em></span></div>
+      <div class="row"><label for="f-age">体年齢</label><span class="in"><input id="f-age" inputmode="numeric" placeholder="—"><em>才</em></span></div>
+      <div class="row"><label for="f-bmi">BMI</label><span class="in"><input id="f-bmi" inputmode="decimal" placeholder="—"><em></em></span></div>
+      <div class="row"><label for="f-steps">歩数（きのう）</label><span class="in"><input id="f-steps" inputmode="numeric" placeholder="—"><em>歩</em></span></div>
+    </div>
+
+    <h2><span class="dl">今日</span>できたこと</h2>
+    <div class="checks" id="checks"></div>
+
+    <h2><span class="dl">今日</span>の体調</h2>
+    <div class="feel" id="feel"></div>
+
+    <h2>ひとこと</h2>
+    <textarea id="f-note" maxlength="1000" placeholder="体調・気づいたこと・質問など"></textarea>
+
+    <button class="save" id="save">記録する</button>
+  </section>
+
+  <!-- ② ルーチン表 -->
+  <section id="tab-table">
+    <h2>ファスティング予定日</h2>
+    <div class="plan" id="plan"></div>
+    <h2>ビフォーアフター写真</h2>
+    <div class="plan" id="photos"></div>
+    <p class="legend">写真はスマートフォンに保存しておいてください（アプリには送りません）</p>
+    <h2>30日のルーチン表</h2>
+    <div class="table-wrap"><table id="table"></table></div>
+    <p class="legend">〇＝できた　オレンジの日＝ファスティング予定日　表は横にスクロールできます</p>
+  </section>
+
+  <!-- ③ グラフ -->
+  <section id="tab-graph">
+    <h2>1日目からの変化</h2>
+    <div class="stats" id="stats"></div>
+    <h2>体重（kg）</h2>
+    <div class="chart" id="chart-weight"></div>
+    <h2>体脂肪率（％）</h2>
+    <div class="chart" id="chart-fat"></div>
+    <h2>体年齢（才）</h2>
+    <div class="chart" id="chart-age"></div>
+    <h2>BMI</h2>
+    <div class="chart" id="chart-bmi"></div>
+    <h2>歩数（歩）<small class="avg" id="steps-avg"></small></h2>
+    <div class="chart" id="chart-steps"></div>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-tab="today"><span class="ic">✏️</span>今日の記録</button>
+  <button data-tab="table"><span class="ic">📅</span>ルーチン表</button>
+  <button data-tab="graph"><span class="ic">📈</span>グラフ</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+// 記録の保存先（Apps Script のウェブアプリ。中身は「アプリのしくみ.gs」）
+const API = 'https://script.google.com/macros/s/AKfycbyJMGOUmlMCagsBp1MCGuoEz9A9uy5eTuSxEeiCTkGfkfALrwSwM5F4_2lWgO6y7AzE/exec';
+const CHECKS = ['瞑想', '呼吸法', 'ヨガ', 'ファスティング', '減食'];
+const FEELS = [['😣', 'わるい'], ['😕', '少し'], ['🙂', 'ふつう'], ['😊', 'よい'], ['😆', 'とても']];
+const NUMS = [['weight', 'f-weight'], ['fat', 'f-fat'], ['age', 'f-age'], ['bmi', 'f-bmi'], ['steps', 'f-steps']];
+
+const $ = function (id) { return document.getElementById(id); };
+let C = null;          // お客さまのデータ（名前・スタート日・予定日・写真・記録）
+let todayDay = 1;      // 今日が何日目か（スタート前は0以下、終わったあとは31以上）
+let sel = 1;           // 記録する日
+let form = { checks: {}, feel: 0 };
+
+// 専用URLの合言葉（ホーム画面から開いたときのために、この端末にも覚えておく）
+let ID = new URLSearchParams(location.search).get('id');
+try {
+  if (ID) localStorage.setItem('jm30-id', ID);
+  else ID = localStorage.getItem('jm30-id');
+} catch (e) { /* 覚えられなくても動く */ }
+
+function call(body) {
+  const req = body
+    ? fetch(API, { method: 'POST', body: JSON.stringify(Object.assign({ id: ID }, body)) })
+    : fetch(API + '?action=get&id=' + encodeURIComponent(ID));
+  return req.then(function (r) { return r.json(); }).then(function (res) {
+    if (!res.ok) throw new Error(res.error);
+    return res.data;
+  });
+}
+
+function dayDiff(a, b) {
+  return Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400000);
+}
+function dateOf(day) {
+  const d = new Date(C.start + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + day - 1);
+  return (d.getUTCMonth() + 1) + '/' + d.getUTCDate();
+}
+function isFast(day) { return C.fasting.some(function (p) { return day >= p.from && day <= p.to; }); }
+function toast(msg) {
+  $('toast').textContent = msg;
+  $('toast').classList.add('on');
+  setTimeout(function () { $('toast').classList.remove('on'); }, 2400);
+}
+
+function start() {
+  if (!ID) {
+    $('cover').innerHTML = 'このページは、お一人ずつの専用URLから開いてください。<br>URLは、やすむらからLINEでお送りしています。';
+    return;
+  }
+  call().then(function (data) {
+    setData(data);
+    sel = Math.min(Math.max(todayDay, 1), 30);
+    fillForm();
+    $('cover').classList.add('off');
+  }).catch(function (err) {
+    $('cover').innerHTML = err.message === 'notfound'
+      ? 'URLが正しくないようです。<br>やすむらからLINEで届いたURLを、もう一度開いてください。'
+      : '読みこめませんでした。<br>電波のよいところで、もう一度開いてください。';
+  });
+}
+
+function setData(data) {
+  C = data;
+  todayDay = C.start ? dayDiff(C.start, C.today) + 1 : 1;
+  renderHeader();
+  renderPhotos();
+  renderTable();
+  renderGraph();
+}
+
+// ヘッダーとお知らせ
+function renderHeader() {
+  $('who').textContent = C.name + ' さん　自分メンテナンス30日';
+  if (todayDay < 1) {
+    $('dayTitle').innerHTML = 'スタートまで あと' + (1 - todayDay) + '日<small>' + dateOf(1) + ' スタート</small>';
+    $('bar').style.width = '0%';
+  } else if (todayDay > 30) {
+    $('dayTitle').innerHTML = '30日 完走！<small>おつかれさまでした</small>';
+    $('bar').style.width = '100%';
+  } else {
+    $('dayTitle').innerHTML = todayDay + '日目<small>' + dateOf(todayDay) + '（あと' + (30 - todayDay) + '日）</small>';
+    $('bar').style.width = (todayDay / 30 * 100) + '%';
+  }
+  const next = C.fasting.filter(function (p) { return p.to >= todayDay; })[0];
+  const msg = !C.fasting.length ? ''
+    : !next ? 'ファスティングはすべて終わりました。おつかれさまでした！'
+    : todayDay >= next.from ? '今日はファスティング中です。水分をしっかりとりましょう。'
+    : '次のファスティングは ' + dateOf(next.from) + '〜' + dateOf(next.to) + '（あと' + (next.from - todayDay) + '日）';
+  $('notice').textContent = msg;
+  $('notice').style.display = msg ? '' : 'none';
+}
+
+// ① 今日の記録
+CHECKS.forEach(function (c) {
+  const b = document.createElement('button');
+  b.className = 'chk';
+  b.dataset.check = c;
+  b.innerHTML = '<span class="mark"></span>' + c;
+  b.onclick = function () { form.checks[c] = !form.checks[c]; paintForm(); };
+  $('checks').appendChild(b);
+});
+FEELS.forEach(function (f, i) {
+  const b = document.createElement('button');
+  b.innerHTML = f[0] + '<span>' + f[1] + '</span>';
+  b.onclick = function () { form.feel = i + 1; paintForm(); };
+  $('feel').appendChild(b);
+});
+function paintForm() {
+  document.querySelectorAll('.chk').forEach(function (b) {
+    const on = !!form.checks[b.dataset.check];
+    b.classList.toggle('done', on);
+    b.querySelector('.mark').textContent = on ? '✓' : '';
+  });
+  [].forEach.call($('feel').children, function (x, j) { x.classList.toggle('on', j + 1 === form.feel); });
+}
+function fillForm() {
+  const r = C.records[sel] || {};
+  NUMS.forEach(function (n) { $(n[1]).value = r[n[0]] != null ? r[n[0]] : ''; });
+  $('f-note').value = r.note || '';
+  form = { checks: Object.assign({}, r.checks || {}), feel: r.feel || 0 };
+  paintForm();
+  const isToday = sel === todayDay;
+  $('selLabel').textContent = sel + '日目（' + dateOf(sel) + '）' + (isToday ? ' 今日' : '');
+  document.querySelectorAll('.dl').forEach(function (s) { s.textContent = isToday ? '今日' : 'この日'; });
+  $('prevDay').disabled = sel <= 1;
+  $('nextDay').disabled = sel >= Math.min(Math.max(todayDay, 1), 30);
+  const notYet = todayDay < 1;
+  $('save').disabled = notYet;
+  $('save').textContent = notYet ? 'スタート日から記録できます' : C.records[sel] ? '記録をなおす' : '記録する';
+}
+$('prevDay').onclick = function () { sel--; fillForm(); };
+$('nextDay').onclick = function () { sel++; fillForm(); };
+$('save').onclick = function () {
+  const rec = { day: sel, checks: form.checks, feel: form.feel, note: $('f-note').value };
+  for (let i = 0; i < NUMS.length; i++) {
+    const raw = $(NUMS[i][1]).value.trim().replace(/[０-９．]/g, function (s) { return String.fromCharCode(s.charCodeAt(0) - 0xFEE0); }).replace(/,/g, '');
+    if (raw && isNaN(Number(raw))) { toast('数字だけを入れてください'); $(NUMS[i][1]).focus(); return; }
+    rec[NUMS[i][0]] = raw ? Number(raw) : null;
+  }
+  $('save').disabled = true;
+  $('save').textContent = '保存しています…';
+  call({ action: 'save', record: rec }).then(function (data) {
+    setData(data);
+    fillForm();
+    toast('記録しました。おつかれさまでした！');
+  }).catch(function () {
+    fillForm();
+    toast('保存できませんでした。もう一度押してください');
+  });
+};
+
+// ビフォーアフター写真（1日目にビフォー、30日目にアフターを撮る）
+const PHOTOS = [['before', 'ビフォー', 1], ['after', 'アフター', 30]];
+function renderPhotos() {
+  $('photos').innerHTML = PHOTOS.map(function (p) {
+    const taken = C.photos[p[0]];
+    return '<div><b>' + p[1] + '（' + p[2] + '日目）</b>' +
+      (taken ? '<div class="photo-done">✓ 撮りました（' + taken + '）</div>'
+        : '<button class="photo-btn" data-photo="' + p[0] + '">📷 撮ったらタップ</button>') + '</div>';
+  }).join('');
+  // 1〜3日目と28〜30日目は、まだ撮っていなければ「今日の記録」の上にもお知らせを出す
+  const due = PHOTOS.filter(function (p) {
+    return !C.photos[p[0]] && Math.abs(todayDay - p[2]) <= 2;
+  })[0];
+  $('photo-today').innerHTML = due
+    ? '<div class="photo-card"><b>📷 ' + due[1] + '写真を撮りましょう</b><br>正面・横から、同じ場所・同じ服で撮るのがおすすめです。' +
+      '<button class="photo-btn" data-photo="' + due[0] + '">撮ったらタップ</button></div>'
+    : '';
+  document.querySelectorAll('[data-photo]').forEach(function (b) {
+    b.onclick = function () {
+      b.disabled = true;
+      call({ action: 'photo', which: b.dataset.photo }).then(function (data) {
+        setData(data);
+        toast('写真のチェックをつけました');
+      }).catch(function () {
+        b.disabled = false;
+        toast('保存できませんでした。もう一度押してください');
+      });
+    };
+  });
+}
+
+// ② ルーチン表
+function renderTable() {
+  $('plan').innerHTML = C.fasting.length ? C.fasting.map(function (p, i) {
+    return '<div><b>' + (i + 1) + '回目</b>' + dateOf(p.from) + '〜' + dateOf(p.to) + '<br><small>' + p.from + '〜' + p.to + '日目</small></div>';
+  }).join('') : '<div>オリエンテーションで決めます</div>';
+  let h = '<tr><th></th><th>日付</th><th>体重</th><th>体脂肪</th><th>体年齢</th><th>BMI</th><th>歩数</th>' +
+    CHECKS.map(function (c) { return '<th>' + c.replace('ファスティング', 'ファス') + '</th>'; }).join('') + '</tr>';
+  for (let d = 1; d <= 30; d++) {
+    const r = C.records[d];
+    const cls = [d === todayDay ? 'today' : '', isFast(d) ? 'fast' : '', d > todayDay ? 'future' : ''].join(' ');
+    const v = function (x) { return r && x != null ? x.toLocaleString() : ''; };
+    const v1 = function (x) { return r && x != null ? x.toFixed(1) : ''; };
+    h += '<tr class="' + cls + '"><td>' + d + '日目</td><td>' + dateOf(d) + '</td>' +
+      '<td class="num">' + v1(r && r.weight) + '</td><td class="num">' + v1(r && r.fat) + '</td>' +
+      '<td class="num">' + v(r && r.age) + '</td><td class="num">' + v1(r && r.bmi) + '</td><td class="num">' + v(r && r.steps) + '</td>' +
+      CHECKS.map(function (c) { return '<td class="o">' + (r && r.checks[c] ? '〇' : '') + '</td>'; }).join('') + '</tr>';
+  }
+  $('table').innerHTML = h;
+}
+
+// ③ グラフ
+function series(key) {
+  const pts = [];
+  for (let d = 1; d <= 30; d++) if (C.records[d] && C.records[d][key] != null) pts.push([d, C.records[d][key]]);
+  return pts;
+}
+function renderGraph() {
+  const tiles = [['weight', '体重', 'kg', 1], ['fat', '体脂肪率', '％', 1], ['age', '体年齢', '才', 0], ['bmi', 'BMI', '', 1]];
+  $('stats').innerHTML = tiles.map(function (t) {
+    const pts = series(t[0]);
+    if (!pts.length) return '<div class="stat"><div class="k">' + t[1] + '</div><div class="v">—</div><div class="d">&nbsp;</div></div>';
+    const last = pts[pts.length - 1][1], x = +(last - pts[0][1]).toFixed(1);
+    return '<div class="stat"><div class="k">' + t[1] + '</div><div class="v">' + last.toFixed(t[3]) + t[2] + '</div>' +
+      '<div class="d">' + (pts.length > 1 ? (x > 0 ? '+' : '') + x + t[2] : '&nbsp;') + '</div></div>';
+  }).join('');
+  const steps = series('steps');
+  $('steps-avg').textContent = steps.length ? '1日平均 ' + Math.round(steps.reduce(function (a, p) { return a + p[1]; }, 0) / steps.length).toLocaleString() + '歩' : '';
+  drawChart('chart-weight', 'weight', '#5f8f6b', 1);
+  drawChart('chart-fat', 'fat', '#d98c5f', 1);
+  drawChart('chart-age', 'age', '#8a7bb5', 0);
+  drawChart('chart-bmi', 'bmi', '#4f8fb0', 1);
+  drawChart('chart-steps', 'steps', '#e0a83a', 0, true);
+}
+// bar が true なら棒グラフ（0から始める）、digits は目もりの小数点以下のけた数
+function drawChart(id, key, color, digits, bar) {
+  const pts = series(key);
+  if (!pts.length) { $(id).innerHTML = '<div class="empty">記録すると、ここにグラフが出ます</div>'; return; }
+  const W = 340, H = 170, L = bar ? 44 : 34, R = 22, T = 12, B = 24;
+  const vals = pts.map(function (p) { return p[1]; });
+  const lo = bar ? 0 : Math.floor(Math.min.apply(null, vals) - 0.5);
+  const hi = bar ? Math.max(2000, Math.ceil(Math.max.apply(null, vals) / 2000) * 2000) : Math.ceil(Math.max.apply(null, vals) + 0.5);
+  const x = function (d) { return L + (d - 1) / 29 * (W - L - R); };
+  const y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
+  let s = '<svg viewBox="0 0 ' + W + ' ' + H + '">';
+  C.fasting.forEach(function (p) {
+    s += '<rect x="' + x(p.from - 0.5) + '" y="' + T + '" width="' + (x(p.to + 0.5) - x(p.from - 0.5)) + '" height="' + (H - T - B) + '" fill="#fbeadf"/>';
+  });
+  for (let i = 0; i <= 2; i++) {
+    const v = lo + (hi - lo) * i / 2;
+    s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#eee8dc"/>' +
+      '<text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" font-size="10" fill="#8a8478" text-anchor="end">' + (bar ? v.toLocaleString() : v.toFixed(digits)) + '</text>';
+  }
+  [1, 10, 20, 30].forEach(function (d) {
+    s += '<text x="' + x(d) + '" y="' + (H - 6) + '" font-size="10" fill="#8a8478" text-anchor="middle">' + d + '日目</text>';
+  });
+  if (bar) {
+    const bw = (W - L - R) / 30 * 0.7;
+    pts.forEach(function (p) {
+      s += '<rect x="' + (x(p[0]) - bw / 2) + '" y="' + y(p[1]) + '" width="' + bw + '" height="' + (y(0) - y(p[1])) + '" rx="2" fill="' + color + '"/>';
+    });
+  } else {
+    s += '<polyline fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" points="' +
+      pts.map(function (p) { return x(p[0]) + ',' + y(p[1]); }).join(' ') + '"/>';
+    pts.forEach(function (p) { s += '<circle cx="' + x(p[0]) + '" cy="' + y(p[1]) + '" r="3" fill="' + color + '"/>'; });
+  }
+  $(id).innerHTML = s + '</svg>';
+}
+
+// 下のタブ
+document.querySelectorAll('nav button').forEach(function (b) {
+  b.onclick = function () {
+    document.querySelectorAll('nav button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    document.querySelectorAll('section').forEach(function (s) { s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab); });
+    window.scrollTo(0, 0);
+  };
+});
+
+start();
+</script>
+</body>
+</html>
